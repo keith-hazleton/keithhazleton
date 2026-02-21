@@ -220,6 +220,28 @@ footer p {
     margin: 0;
 }
 
+.social-icons {
+    margin-bottom: 12px;
+}
+
+.social-icons a {
+    display: inline-block;
+    margin: 0 10px;
+    transition: transform 0.2s, opacity 0.2s;
+    opacity: 0.85;
+}
+
+.social-icons a:hover {
+    transform: translateY(-3px);
+    opacity: 1;
+}
+
+.social-icons svg {
+    width: 28px;
+    height: 28px;
+    fill: white;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero {
