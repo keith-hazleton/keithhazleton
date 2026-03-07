@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Links - Keith Hazleton, MD, PhD</title>
-    <meta name="description" content="Professional links and resources for Keith Hazleton including research lab, CHLA profile, and collaborators.">
+    <title>Music - Keith Hazleton</title>
+    <meta name="description" content="An interactive map of my music taste, built from Apple Music listening data and Last.fm similarity.">
     <meta name="author" content="Keith Hazleton">
-    <link rel="canonical" href="https://keithhazleton.com/links.html">
+    <link rel="canonical" href="https://keithhazleton.com/music.html">
 
     <!-- Favicons -->
     <link rel="icon" href="favicon.ico" sizes="any">
@@ -20,6 +20,46 @@
 
     <link rel="stylesheet" href="styles.css">
 
+    <style>
+        .graph-container {
+            width: 100%;
+            height: calc(100vh - 160px);
+            min-height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            margin-top: 32px;
+        }
+
+        .graph-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .music-intro {
+            padding-top: 140px;
+            padding-bottom: 0;
+        }
+
+        .music-graph-section {
+            padding: 24px 40px 40px;
+            max-width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .music-graph-section {
+                padding: 24px 20px 20px;
+            }
+
+            .graph-container {
+                height: calc(100vh - 200px);
+                border-radius: 8px;
+            }
+        }
+    </style>
+
     <!-- GoatCounter Analytics -->
     <script data-goatcounter="https://keithhazleton.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
@@ -27,7 +67,7 @@
 <body>
 
     <!-- Header -->
-    <header class="site-header">
+    <header class="site-header scrolled">
         <a href="index.html" class="site-name">Keith Hazleton</a>
         <nav class="site-nav">
             <a href="index.html">About</a>
@@ -36,43 +76,19 @@
         </nav>
     </header>
 
-    <!-- Links -->
-    <section class="section" style="padding-top: 140px;">
-        <div class="section-label">Connect</div>
-        <h2 class="section-title">Professional Links</h2>
-        <p>Research collaborators, institutional profiles, and ways to connect.</p>
+    <!-- Intro -->
+    <section class="section music-intro">
+        <div class="section-label">Side Project</div>
+        <h2 class="section-title">Music Similarity Map</h2>
+        <p>
+            An interactive graph of my music taste built from Apple Music listening history. Nodes are artists sized by engagement, colored by community. Edges come from two sources: Last.fm listener similarity (solid white) and genre tag overlap (dashed gold). Click an artist for details, drag to pin, search to find.
+        </p>
+    </section>
 
-        <div class="links-grid">
-            <a href="https://hazletonlab.com" class="link-card" target="_blank">
-                <div class="link-card-title">Hazleton Lab</div>
-                <div class="link-card-desc">My research group investigating nutrition, infection, and liver disease</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
-            <a href="https://www.chla.org/profile/keith-hazleton-md-phd" class="link-card" target="_blank">
-                <div class="link-card-title">CHLA Profile</div>
-                <div class="link-card-desc">My profile at Children's Hospital Los Angeles</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
-            <a href="https://lozuponelab.com" class="link-card" target="_blank">
-                <div class="link-card-title">Lozupone Lab</div>
-                <div class="link-card-desc">Collaborators at University of Colorado Anschutz Medical Campus</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
-            <a href="https://sc-ctsi.org/" class="link-card" target="_blank">
-                <div class="link-card-title">SC-CTSI</div>
-                <div class="link-card-desc">Southern California Clinical and Translational Science Institute</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
-            <a href="https://www.linkedin.com/in/keith-hazleton/" class="link-card" target="_blank">
-                <div class="link-card-title">LinkedIn</div>
-                <div class="link-card-desc">Connect with me professionally</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
-            <a href="https://theforkiverse.com/@hazletok" class="link-card" target="_blank" rel="me">
-                <div class="link-card-title">Mastodon</div>
-                <div class="link-card-desc">Follow me on the Fediverse</div>
-                <span class="link-card-arrow">&rarr;</span>
-            </a>
+    <!-- Graph -->
+    <section class="music-graph-section">
+        <div class="graph-container">
+            <iframe src="similarity.html" title="Artist Similarity Graph" loading="lazy"></iframe>
         </div>
     </section>
 
