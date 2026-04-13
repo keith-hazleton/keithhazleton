@@ -1,0 +1,8 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Claude / AI instruction files
+CLAUDE.md
+**/CLAUDE.md
+SSC_SPEC.md
