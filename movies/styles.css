@@ -1,0 +1,677 @@
+/* ============================================
+   Second Saturday Cinema
+   Inherits base vars from ../styles.css
+   Adds cinema-specific accents + components
+   ============================================ */
+
+:root {
+    --ssc-red: #b23a2e;
+    --ssc-red-soft: rgba(178, 58, 46, 0.18);
+    --ssc-amber: #e8a64a;
+    --ssc-cream: #f1e3c6;
+    --ssc-curtain: #2a0e0c;
+}
+
+/* `[hidden]` must win over display:flex/grid rules below */
+[hidden] { display: none !important; }
+
+/* Kill the parent site's grain overlay on this page — Safari rasterizes
+   the SVG turbulence filter in a way that creates visible banding/double-stroke
+   artifacts across serif text. */
+body.ssc-body::before { display: none !important; content: none !important; }
+
+/* Defensive — don't rely on parent stylesheet cascade */
+html, body.ssc-body {
+    background: #0d0d0c;
+    color: #e8e0d4;
+    min-height: 100vh;
+}
+
+body.ssc-body {
+    font-family: var(--font-body, 'Hanken Grotesk', -apple-system, sans-serif);
+    font-synthesis: none;
+}
+
+/* Instrument Serif only ships at weight 400 — lock display text to that
+   weight so Safari doesn't faux-bold the h1 defaults (which renders as
+   visibly doubled/hairy strokes). */
+.gate-title,
+.marquee-title,
+.section-title,
+.ticket-date,
+.expect-num,
+.stat-value,
+.ssc-mark {
+    font-weight: 400;
+}
+
+/* ---- GATE ---- */
+.gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    position: relative;
+    background-color: #0d0d0c;
+    background-image:
+        radial-gradient(ellipse at 50% 30%, rgba(232, 166, 74, 0.08), transparent 60%),
+        radial-gradient(ellipse at 50% 80%, rgba(178, 58, 46, 0.1), transparent 55%);
+    overflow: hidden;
+}
+
+.gate::before {
+    /* vignette */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+}
+
+.gate-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 560px;
+    text-align: center;
+}
+
+.gate-kicker {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ssc-amber);
+    margin-bottom: 28px;
+}
+
+.gate-title {
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 10vw, 6rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ssc-cream);
+    margin-bottom: 28px;
+}
+
+.gate-title .line {
+    display: block;
+    line-height: 1;
+    padding: 0.05em 0;
+}
+
+.gate-title .italic {
+    color: var(--ssc-amber);
+    font-style: italic;
+}
+
+.gate-tag {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.gate-form {
+    display: flex;
+    gap: 8px;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.gate-form input {
+    flex: 1;
+    padding: 14px 18px;
+    font: inherit;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: rgba(232, 224, 212, 0.04);
+    border: 1px solid var(--border-visible);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.gate-form input:focus {
+    border-color: var(--ssc-amber);
+    background: rgba(232, 166, 74, 0.06);
+}
+
+.gate-form button {
+    padding: 14px 22px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    color: var(--bg-deep);
+    background: var(--ssc-amber);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gate-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(232, 166, 74, 0.28);
+}
+
+.gate-error {
+    min-height: 1.2em;
+    margin-top: 16px;
+    font-size: 0.88rem;
+    color: var(--ssc-red);
+    letter-spacing: 0.02em;
+}
+
+.gate-reel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 20px;
+    font-size: 0.5rem;
+    color: var(--ssc-amber);
+    opacity: 0.35;
+    letter-spacing: 0.8em;
+}
+
+/* ---- SITE LAYOUT ---- */
+.ssc-site {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+}
+
+.ssc-header {
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ssc-back {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    transition: color 0.3s;
+}
+
+.ssc-back:hover { color: var(--ssc-amber); }
+
+.ssc-mark {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--ssc-cream);
+    letter-spacing: 0.05em;
+}
+
+/* ---- MARQUEE ---- */
+.marquee {
+    position: relative;
+    margin: 20px 0 80px;
+    padding: 80px 48px;
+    background:
+        radial-gradient(ellipse at top, rgba(232, 166, 74, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--ssc-curtain), #1a0907 70%, var(--bg-deep));
+    border: 1px solid var(--border-visible);
+    border-radius: 20px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.marquee-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.marquee-kicker {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ssc-amber);
+    margin-bottom: 20px;
+}
+
+.marquee-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ssc-cream);
+    margin-bottom: 22px;
+}
+
+.marquee-title .line {
+    display: block;
+    line-height: 1;
+    padding: 0.05em 0;
+}
+
+.marquee-title .italic {
+    color: var(--ssc-amber);
+    font-style: italic;
+}
+
+.marquee-sub {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.marquee-bulbs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 14px;
+    background-image: radial-gradient(circle, var(--ssc-amber) 0 3px, transparent 4px);
+    background-size: 28px 14px;
+    background-repeat: repeat-x;
+    background-position: center;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px rgba(232, 166, 74, 0.5));
+}
+
+.marquee-bulbs-bottom {
+    top: auto;
+    bottom: 0;
+}
+
+/* ---- SECTIONS ---- */
+.ssc-section {
+    padding: 40px 0 60px;
+}
+
+.ssc-section .section-label {
+    color: var(--ssc-amber);
+}
+
+.ssc-section .section-title em {
+    color: var(--ssc-amber);
+    font-style: italic;
+    line-height: inherit;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ---- INTRO ---- */
+.intro {
+    max-width: 780px;
+}
+
+.intro .section-title {
+    margin-bottom: 36px;
+}
+
+.intro-body {
+    display: grid;
+    gap: 20px;
+    border-left: 2px solid var(--ssc-red);
+    padding-left: 28px;
+}
+
+.intro-body p {
+    font-size: 1.08rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.intro-body p em {
+    color: var(--ssc-amber);
+    font-style: italic;
+    font-family: var(--font-display);
+    font-weight: 400;
+}
+
+@media (max-width: 600px) {
+    .intro-body {
+        padding-left: 20px;
+    }
+}
+
+/* ---- TICKET ---- */
+.ticket {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    background: linear-gradient(135deg, #1a1410 0%, var(--bg-surface) 100%);
+    border: 1px solid var(--border-visible);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.ticket-stub {
+    background:
+        repeating-linear-gradient(45deg, transparent 0 8px, rgba(0,0,0,0.1) 8px 10px),
+        linear-gradient(180deg, var(--ssc-red) 0%, #7a2620 100%);
+    padding: 36px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    color: var(--ssc-cream);
+}
+
+.ticket-stub::after {
+    /* perforation */
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-image: radial-gradient(circle, var(--bg-surface) 0 3px, transparent 3px);
+    background-size: 2px 14px;
+    background-repeat: repeat-y;
+}
+
+.ticket-stub-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.ticket-stub-value {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 1;
+    margin: 6px 0 10px;
+}
+
+.ticket-body {
+    padding: 40px 44px;
+}
+
+.ticket-kicker {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ssc-amber);
+    margin-bottom: 14px;
+}
+
+.ticket-date {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 2.8rem);
+    line-height: 1.1;
+    color: var(--ssc-cream);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+}
+
+.ticket-time {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+}
+
+.ticket-meta {
+    display: grid;
+    gap: 18px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border-visible);
+}
+
+.ticket-meta > div {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 20px;
+    align-items: baseline;
+}
+
+.ticket-meta dt {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.ticket-meta dd {
+    font-size: 1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.ticket-meta dd .muted {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+/* ---- EXPECT GRID ---- */
+.expect-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.expect-card {
+    padding: 28px 24px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    transition: border-color 0.4s, transform 0.4s, background 0.4s;
+}
+
+.expect-card:hover {
+    border-color: var(--ssc-amber);
+    background: var(--bg-elevated);
+    transform: translateY(-3px);
+}
+
+.expect-num {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--ssc-amber);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+
+.expect-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.expect-card p {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ---- SIGNAL BOX ---- */
+.signal-box {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: center;
+    padding: 48px 52px;
+    background:
+        radial-gradient(circle at top right, var(--ssc-red-soft), transparent 60%),
+        var(--bg-surface);
+    border: 1px solid var(--border-visible);
+    border-radius: 16px;
+}
+
+.signal-title {
+    margin-bottom: 16px;
+}
+
+.signal-box p {
+    color: var(--text-secondary);
+    max-width: 540px;
+    line-height: 1.7;
+}
+
+.signal-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 28px;
+    background: var(--ssc-amber);
+    color: var(--bg-deep);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.signal-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(232, 166, 74, 0.3);
+}
+
+.signal-cta .signal-arrow {
+    transition: transform 0.3s;
+}
+
+.signal-cta:hover .signal-arrow {
+    transform: translateX(4px);
+}
+
+/* ---- FOOTER ---- */
+.ssc-footer {
+    margin-top: 60px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.ssc-signout {
+    background: none;
+    border: 1px solid var(--border-visible);
+    color: var(--text-muted);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.ssc-signout:hover {
+    color: var(--ssc-amber);
+    border-color: var(--ssc-amber);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+    .expect-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .signal-box {
+        grid-template-columns: 1fr;
+        padding: 36px 28px;
+    }
+
+    .ticket {
+        grid-template-columns: 110px 1fr;
+    }
+
+    .ticket-stub-value {
+        font-size: 2.2rem;
+    }
+
+    .ticket-body {
+        padding: 32px 28px;
+    }
+}
+
+@media (max-width: 600px) {
+    .ssc-site {
+        padding: 0 20px 60px;
+    }
+
+    .marquee {
+        padding: 60px 24px;
+        border-radius: 14px;
+    }
+
+    .ticket {
+        grid-template-columns: 1fr;
+    }
+
+    .ticket-stub {
+        padding: 20px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 12px;
+        align-items: baseline;
+    }
+
+    .ticket-stub::after {
+        right: 0;
+        left: 0;
+        top: auto;
+        bottom: -1px;
+        height: 2px;
+        width: auto;
+        background-image: radial-gradient(circle, var(--bg-surface) 0 3px, transparent 3px);
+        background-size: 14px 2px;
+        background-repeat: repeat-x;
+    }
+
+    .ticket-stub-value {
+        font-size: 1.8rem;
+        margin: 0;
+    }
+
+    .ticket-meta > div {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .expect-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gate-form {
+        flex-direction: column;
+    }
+
+    .ssc-footer {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
