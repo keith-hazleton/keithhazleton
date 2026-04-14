@@ -603,6 +603,18 @@ body.ssc-body {
     line-height: 1.5;
 }
 
+.ticket-meta dd a {
+    color: var(--ssc-amber);
+    text-decoration: underline wavy var(--ssc-coral);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.2em;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.ticket-meta dd a:hover {
+    color: var(--ssc-cream);
+}
+
 .ticket-meta dd .muted {
     color: var(--ssc-ink);
     opacity: 0.55;
