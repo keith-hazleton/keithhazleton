@@ -16,6 +16,10 @@
 
     <!-- Gate -->
     <section id="gate" class="gate">
+        <div class="gate-stars" aria-hidden="true">
+            <span>✦</span><span>✧</span><span>✦</span><span>✦</span>
+            <span>✧</span><span>✦</span><span>✦</span><span>✧</span>
+        </div>
         <div class="gate-inner">
             <div class="gate-kicker">Members Only · Est. 2026</div>
             <h1 class="gate-title">
@@ -46,7 +50,9 @@
 
         <!-- Marquee -->
         <section class="marquee">
-            <div class="marquee-bulbs" aria-hidden="true"></div>
+            <div class="marquee-bulbs top" aria-hidden="true"></div>
+            <span class="marquee-popcorn left" aria-hidden="true">🍿</span>
+            <span class="marquee-popcorn right" aria-hidden="true">🌙</span>
             <div class="marquee-inner">
                 <div class="marquee-kicker">Now Showing · Second Saturday Cinema</div>
                 <h1 class="marquee-title">
@@ -56,8 +62,10 @@
                 </h1>
                 <p class="marquee-sub">Monthly. Backyard. BYO chair, blanket, and appetite. Kids welcome.</p>
             </div>
-            <div class="marquee-bulbs marquee-bulbs-bottom" aria-hidden="true"></div>
+            <div class="marquee-bulbs bottom" aria-hidden="true"></div>
         </section>
+
+        <div class="squiggle" aria-hidden="true"></div>
 
         <!-- Intro / why -->
         <section class="ssc-section reveal">
@@ -72,8 +80,10 @@
             </div>
         </section>
 
+        <div class="squiggle" aria-hidden="true"></div>
+
         <!-- Ticket / Next event -->
-        <section class="ssc-section reveal">
+        <section class="ssc-section reveal ticket-wrap">
             <div class="ticket">
                 <div class="ticket-stub">
                     <div class="ticket-stub-label">Admit</div>
@@ -103,6 +113,8 @@
             </div>
         </section>
 
+        <div class="squiggle" aria-hidden="true"></div>
+
         <!-- What to expect -->
         <section class="ssc-section reveal">
             <div class="section-label">The Gist</div>
@@ -130,6 +142,8 @@
                 </div>
             </div>
         </section>
+
+        <div class="squiggle" aria-hidden="true"></div>
 
         <!-- Signal -->
         <section class="ssc-section reveal">
@@ -168,6 +182,22 @@
                 site.hidden = false;
                 document.body.classList.add('unlocked');
                 initReveal();
+                initBulbs();
+            }
+
+            function initBulbs() {
+                const strips = document.querySelectorAll('.marquee-bulbs');
+                const count = 24;
+                strips.forEach(strip => {
+                    if (strip.childElementCount) return;
+                    for (let i = 0; i < count; i++) {
+                        const b = document.createElement('span');
+                        b.className = 'bulb';
+                        b.style.animationDelay = (Math.random() * -3.2).toFixed(2) + 's';
+                        b.style.animationDuration = (2.6 + Math.random() * 1.4).toFixed(2) + 's';
+                        strip.appendChild(b);
+                    }
+                });
             }
 
             // Delay init so helpers below are defined
