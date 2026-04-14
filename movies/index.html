@@ -82,6 +82,23 @@
 
         <div class="squiggle" aria-hidden="true"></div>
 
+        <!-- Signal -->
+        <section class="ssc-section reveal">
+            <div class="signal-box">
+                <div>
+                    <div class="section-label">Stay in the loop</div>
+                    <h2 class="section-title signal-title">Join the <em>Signal</em> group.</h2>
+                    <p>RSVPs, the exact address, day-of updates, and potluck coordination all live in the group chat. The site is just the polished hub.</p>
+                </div>
+                <a href="https://signal.group/#CjQKIPIHrhd5dbpzTYMVuhy-jOu0lMc3NAm5IGkXOdMtknTGEhAMc9NEw6aL-GXXkolLiNV8" class="signal-cta" target="_blank" rel="noopener">
+                    <span>Join the group</span>
+                    <span class="signal-arrow">→</span>
+                </a>
+            </div>
+        </section>
+
+        <div class="squiggle" aria-hidden="true"></div>
+
         <!-- Ticket / Next event -->
         <section class="ssc-section reveal ticket-wrap">
             <div class="ticket">
@@ -92,12 +109,12 @@
                 </div>
                 <div class="ticket-body">
                     <div class="ticket-kicker">Next Screening</div>
-                    <div class="ticket-date">Saturday · May 9 · 2026</div>
-                    <div class="ticket-time">Doors at dusk · Film starts ~8:15 PM</div>
+                    <div class="ticket-date" id="ticket-date">—</div>
+                    <div class="ticket-time" id="ticket-time">—</div>
                     <dl class="ticket-meta">
                         <div>
                             <dt>Feature</dt>
-                            <dd>TBD — nominations open soon</dd>
+                            <dd id="ticket-feature">—</dd>
                         </div>
                         <div>
                             <dt>Location</dt>
@@ -109,8 +126,26 @@
                         </div>
                     </dl>
                 </div>
-                <div class="ticket-perf" aria-hidden="true"></div>
             </div>
+        </section>
+
+        <div class="squiggle" aria-hidden="true"></div>
+
+        <!-- Ballot -->
+        <section class="ssc-section ballot-section reveal" id="ballot">
+            <div class="section-label">The Ballot</div>
+            <h2 class="section-title">Cast your <em>vote</em>.</h2>
+            <p class="ballot-intro">Tap to vote or un-vote. Vote for as many as you'd like — the winner gets the marquee.</p>
+            <div class="ballot-deadline" id="ballot-deadline"></div>
+            <div class="ballot-grid" id="ballot-grid"></div>
+            <details class="nominate-form">
+                <summary>+ Nominate a movie</summary>
+                <form id="nominate-form">
+                    <input type="text" name="title" placeholder="Movie title" maxlength="200" required>
+                    <textarea name="pitch" placeholder="Why should we watch it? (optional)" rows="2" maxlength="500"></textarea>
+                    <button type="submit">Add to the ballot</button>
+                </form>
+            </details>
         </section>
 
         <div class="squiggle" aria-hidden="true"></div>
@@ -143,118 +178,40 @@
             </div>
         </section>
 
-        <div class="squiggle" aria-hidden="true"></div>
-
-        <!-- Signal -->
-        <section class="ssc-section reveal">
-            <div class="signal-box">
-                <div>
-                    <div class="section-label">Stay in the loop</div>
-                    <h2 class="section-title signal-title">Join the <em>Signal</em> group.</h2>
-                    <p>RSVPs, the exact address, day-of updates, and potluck coordination all live in the group chat. The site is just the polished hub.</p>
-                </div>
-                <a href="https://signal.group/#CjQKIPIHrhd5dbpzTYMVuhy-jOu0lMc3NAm5IGkXOdMtknTGEhAMc9NEw6aL-GXXkolLiNV8" class="signal-cta" target="_blank" rel="noopener">
-                    <span>Join the group</span>
-                    <span class="signal-arrow">→</span>
-                </a>
-            </div>
+        <!-- Past screenings (hidden until one exists) -->
+        <section class="ssc-section gallery-section reveal" id="gallery-section" hidden>
+            <div class="section-label">The Reel</div>
+            <h2 class="section-title">Past <em>screenings</em>.</h2>
+            <div class="gallery-grid" id="gallery-grid"></div>
         </section>
+
+        <div class="squiggle" aria-hidden="true"></div>
 
         <footer class="ssc-footer">
             <div>© 2026 Second Saturday Cinema · Keith's backyard</div>
-            <button class="ssc-signout" id="ssc-signout" type="button">Sign out</button>
+            <div class="ssc-footer-actions">
+                <a href="#/admin" id="footer-admin">Admin sign-in</a>
+                <button class="ssc-signout" id="ssc-signout" type="button">Sign out</button>
+            </div>
         </footer>
     </main>
 
-    <script>
-        (function() {
-            const CODE = 'lcfmovies';
-            const KEY = 'ssc-unlocked';
+    <!-- Admin -->
+    <main id="admin" class="ssc-admin" hidden>
+        <section id="admin-gate" class="admin-gate-section">
+            <div class="admin-gate-inner">
+                <a href="#/" class="admin-back">← Back to site</a>
+                <h1>Admin sign-in</h1>
+                <form id="admin-gate-form" autocomplete="off">
+                    <input type="password" id="admin-gate-input" placeholder="Admin code" autocomplete="off">
+                    <button type="submit">Enter</button>
+                </form>
+                <div id="admin-gate-error" class="gate-error" aria-live="polite"></div>
+            </div>
+        </section>
+        <section id="admin-panel" class="admin-panel" hidden></section>
+    </main>
 
-            const gate = document.getElementById('gate');
-            const site = document.getElementById('site');
-            const form = document.getElementById('gate-form');
-            const input = document.getElementById('gate-input');
-            const err = document.getElementById('gate-error');
-
-            function unlock() {
-                gate.hidden = true;
-                site.hidden = false;
-                document.body.classList.add('unlocked');
-                initReveal();
-                initBulbs();
-            }
-
-            function initBulbs() {
-                const strips = document.querySelectorAll('.marquee-bulbs');
-                const count = 24;
-                strips.forEach(strip => {
-                    if (strip.childElementCount) return;
-                    for (let i = 0; i < count; i++) {
-                        const b = document.createElement('span');
-                        b.className = 'bulb';
-                        b.style.animationDelay = (Math.random() * -3.2).toFixed(2) + 's';
-                        b.style.animationDuration = (2.6 + Math.random() * 1.4).toFixed(2) + 's';
-                        strip.appendChild(b);
-                    }
-                });
-            }
-
-            // Delay init so helpers below are defined
-            window.addEventListener('DOMContentLoaded', () => {
-                if (isRemembered()) { unlock(); } else { input.focus(); }
-            });
-
-            function remember() {
-                try { localStorage.setItem(KEY, '1'); return; } catch (e) {}
-                try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
-            }
-
-            function forget() {
-                try { localStorage.removeItem(KEY); } catch (e) {}
-                try { sessionStorage.removeItem(KEY); } catch (e) {}
-            }
-
-            function isRemembered() {
-                try { if (localStorage.getItem(KEY) === '1') return true; } catch (e) {}
-                try { if (sessionStorage.getItem(KEY) === '1') return true; } catch (e) {}
-                return false;
-            }
-
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const val = (input.value || '').trim().toLowerCase();
-                if (val === CODE) {
-                    remember();
-                    err.textContent = '';
-                    unlock();
-                } else {
-                    err.textContent = 'That code doesn\u2019t match. Check with Keith.';
-                    input.select();
-                }
-            });
-
-            const signout = document.getElementById('ssc-signout');
-            if (signout) {
-                signout.addEventListener('click', () => {
-                    forget();
-                    location.reload();
-                });
-            }
-
-            function initReveal() {
-                const reveals = document.querySelectorAll('.reveal');
-                const obs = new IntersectionObserver((entries) => {
-                    entries.forEach(en => {
-                        if (en.isIntersecting) {
-                            en.target.classList.add('visible');
-                            obs.unobserve(en.target);
-                        }
-                    });
-                }, { threshold: 0.15 });
-                reveals.forEach(el => obs.observe(el));
-            }
-        })();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>

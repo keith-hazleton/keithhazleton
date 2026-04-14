@@ -1,0 +1,7 @@
+name = "second-saturday-cinema"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+
+[[kv_namespaces]]
+binding = "CINEMA_KV"
+id = "fc646ff6f3c54efb96aff83e47d52c75"
