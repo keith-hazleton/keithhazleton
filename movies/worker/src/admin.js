@@ -67,5 +67,29 @@ export async function handleAdmin(request, env, cors) {
         return json({ screening }, 200, cors);
     }
 
+    const screeningMatch = path.match(/^\/admin\/screening\/(\d+)$/);
+    if (screeningMatch) {
+        const id = parseInt(screeningMatch[1]);
+        const key = `screening:${id}`;
+        if (method === 'DELETE') {
+            await env.CINEMA_KV.delete(key);
+            return json({ ok: true }, 200, cors);
+        }
+        if (method === 'PATCH') {
+            const existing = await env.CINEMA_KV.get(key, 'json');
+            if (!existing) return json({ error: 'Not found' }, 404, cors);
+            const body = await request.json().catch(() => ({}));
+            const next = {
+                ...existing,
+                title: body.title ?? existing.title,
+                date: body.date ?? existing.date,
+                photoUrl: body.photoUrl !== undefined ? (body.photoUrl || null) : existing.photoUrl,
+                review: body.review !== undefined ? (body.review || null) : existing.review,
+            };
+            await env.CINEMA_KV.put(key, JSON.stringify(next));
+            return json({ screening: next }, 200, cors);
+        }
+    }
+
     return json({ error: 'Not found' }, 404, cors);
 }

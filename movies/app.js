@@ -334,6 +334,15 @@ function renderAdminPanel() {
         </section>
 
         <section class="admin-block">
+            <h2>Past screenings</h2>
+            ${state.screenings.length === 0
+                ? '<p class="admin-hint">None yet.</p>'
+                : `<ul class="admin-screening-list">
+                    ${state.screenings.map(s => renderScreeningRow(s)).join('')}
+                </ul>`}
+        </section>
+
+        <section class="admin-block">
             <button id="admin-signout" class="danger">Sign out</button>
         </section>
     `;
@@ -344,6 +353,26 @@ function renderAdminPanel() {
     panel.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', onAdminAction);
     });
+    panel.querySelectorAll('.admin-screening-edit').forEach(form => {
+        form.addEventListener('submit', onScreeningEdit);
+    });
+}
+
+function renderScreeningRow(s) {
+    return `
+        <li class="admin-screening-row" data-id="${s.id}">
+            <form class="admin-screening-edit admin-form" data-id="${s.id}">
+                <label>Title <input type="text" name="title" value="${escapeAttr(s.title)}" required></label>
+                <label>Date <input type="date" name="date" value="${escapeAttr(s.date)}" required></label>
+                <label>Photo URL <input type="url" name="photoUrl" value="${escapeAttr(s.photoUrl || '')}"></label>
+                <label>Review <input type="text" name="review" value="${escapeAttr(s.review || '')}"></label>
+                <div class="admin-screening-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" data-action="screening-delete" data-id="${s.id}" class="danger">Delete</button>
+                </div>
+            </form>
+        </li>
+    `;
 }
 
 async function onEventSave(e) {
@@ -375,7 +404,26 @@ async function onScreeningAdd(e) {
     if (status !== 200) { alert(data.error || 'Failed.'); return; }
     await loadScreenings();
     e.target.reset();
-    alert('Added.');
+    renderAdminPanel();
+    renderGallery();
+}
+
+async function onScreeningEdit(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const id = form.dataset.id;
+    const fd = new FormData(form);
+    const body = {
+        title: fd.get('title'),
+        date: fd.get('date'),
+        photoUrl: fd.get('photoUrl') || '',
+        review: fd.get('review') || '',
+    };
+    const { status, data } = await api(`/admin/screening/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+    if (status !== 200) { alert(data.error || 'Failed.'); return; }
+    await loadScreenings();
+    renderAdminPanel();
+    renderGallery();
 }
 
 async function onAdminAction(e) {
@@ -393,6 +441,13 @@ async function onAdminAction(e) {
         if (status !== 200) { alert(data.error || 'Failed.'); return; }
         await loadMovies();
         renderAdminPanel();
+    } else if (action === 'screening-delete') {
+        if (!confirm('Delete this past screening?')) return;
+        const { status, data } = await api(`/admin/screening/${id}`, { method: 'DELETE' });
+        if (status !== 200) { alert(data.error || 'Failed.'); return; }
+        await loadScreenings();
+        renderAdminPanel();
+        renderGallery();
     } else if (action === 'reset-votes' || action === 'reset-all') {
         const clear = action === 'reset-all';
         if (!confirm(clear ? 'Reset all votes AND remove all nominees?' : 'Reset all vote counts?')) return;

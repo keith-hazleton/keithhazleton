@@ -1357,6 +1357,48 @@ body.ssc-body {
     gap: 10px;
 }
 
+.admin-screening-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+}
+.admin-screening-row {
+    padding: 14px 16px;
+    background: var(--ssc-dusk);
+    border: 1px solid rgba(247, 234, 208, 0.08);
+    border-radius: 10px;
+}
+.admin-screening-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+.admin-screening-actions button {
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    background: rgba(247, 234, 208, 0.06);
+    color: var(--ssc-cream);
+    border: 1px solid rgba(247, 234, 208, 0.18);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.admin-screening-actions button:hover {
+    background: rgba(242, 180, 74, 0.12);
+    border-color: var(--ssc-amber);
+}
+.admin-screening-actions button.danger {
+    color: var(--ssc-coral);
+    border-color: rgba(232, 122, 122, 0.35);
+}
+.admin-screening-actions button.danger:hover {
+    background: rgba(232, 122, 122, 0.12);
+    border-color: var(--ssc-coral);
+}
+
 @media (max-width: 600px) {
     .ballot-card {
         grid-template-columns: 1fr;
