@@ -1,5 +1,6 @@
 const ALLOWED_ORIGINS = [
     'https://keithhazleton.com',
+    'https://www.keithhazleton.com',
     'http://localhost:8000',
     'http://localhost:5173',
 ];
@@ -9,7 +10,7 @@ export function corsHeaders(origin) {
     return {
         'Access-Control-Allow-Origin': allow,
         'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Vary': 'Origin',
     };

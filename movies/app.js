@@ -262,14 +262,19 @@ function initAdminGate() {
         const input = document.getElementById('admin-gate-input');
         const err = document.getElementById('admin-gate-error');
         const code = input.value.trim();
-        const ok = await loginAdmin(code);
-        if (ok) {
-            err.textContent = '';
-            renderAdmin();
-            await refreshAll();
-        } else {
-            err.textContent = 'Nope.';
-            input.select();
+        try {
+            const ok = await loginAdmin(code);
+            if (ok) {
+                err.textContent = '';
+                renderAdmin();
+                await refreshAll();
+            } else {
+                err.textContent = 'Nope.';
+                input.select();
+            }
+        } catch (ex) {
+            err.textContent = 'Connection error — try refreshing.';
+            console.error('Admin login failed:', ex);
         }
     });
 }
@@ -492,13 +497,18 @@ function initGate() {
         e.preventDefault();
         const code = (input.value || '').trim();
         if (!code) return;
-        const ok = await loginGuest(code);
-        if (ok) {
-            err.textContent = '';
-            await unlock();
-        } else {
-            err.textContent = "That code doesn't match. Check with Keith.";
-            input.select();
+        try {
+            const ok = await loginGuest(code);
+            if (ok) {
+                err.textContent = '';
+                await unlock();
+            } else {
+                err.textContent = "That code doesn't match. Check with Keith.";
+                input.select();
+            }
+        } catch (ex) {
+            err.textContent = 'Connection error — try refreshing.';
+            console.error('Login failed:', ex);
         }
     });
 
