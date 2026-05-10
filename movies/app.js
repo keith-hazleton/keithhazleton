@@ -94,6 +94,7 @@ function renderTicket() {
     const dateEl = document.getElementById('ticket-date');
     const timeEl = document.getElementById('ticket-time');
     const featureEl = document.getElementById('ticket-feature');
+    const calBtn = document.getElementById('ticket-cal');
     if (ev.date) {
         const d = new Date(ev.date + 'T12:00:00');
         const fmt = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -105,6 +106,81 @@ function renderTicket() {
     } else {
         featureEl.innerHTML = `TBD — <a href="#ballot">cast your vote</a>`;
     }
+    if (calBtn) {
+        calBtn.hidden = !ev.date;
+        calBtn.onclick = downloadCalendarFile;
+    }
+}
+
+function downloadCalendarFile() {
+    const ev = state.event || {};
+    if (!ev.date) return;
+    const ics = buildIcs(ev);
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `second-saturday-cinema-${ev.date}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function buildIcs(ev) {
+    const date = ev.date.replace(/-/g, '');
+    const dtstart = `${date}T190000`;
+    const dtend = `${date}T223000`;
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const movie = ev.selectedMovie && ev.selectedMovie.title;
+    const summary = movie ? `Second Saturday Cinema — ${movie}` : 'Second Saturday Cinema';
+    const descLines = [
+        'Backyard movie night.',
+        ev.time ? `Schedule: ${ev.time}` : null,
+        '',
+        'Full address and day-of updates in the Signal group.',
+    ].filter(Boolean);
+    const description = descLines.join('\\n');
+    const lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Second Saturday Cinema//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:ssc-${ev.date}@keithhazleton.com`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;TZID=America/Los_Angeles:${dtstart}`,
+        `DTEND;TZID=America/Los_Angeles:${dtend}`,
+        `SUMMARY:${icsEscape(summary)}`,
+        `LOCATION:${icsEscape('The Gableson backyard, La Cañada Flintridge')}`,
+        `DESCRIPTION:${icsEscape(description)}`,
+        'URL:https://keithhazleton.com/movies/',
+        'END:VEVENT',
+        'END:VCALENDAR',
+    ];
+    return lines.map(foldLine).join('\r\n') + '\r\n';
+}
+
+function icsEscape(s) {
+    return String(s || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
+}
+
+function foldLine(line) {
+    if (line.length <= 75) return line;
+    const out = [];
+    let i = 0;
+    out.push(line.slice(0, 75));
+    i = 75;
+    while (i < line.length) {
+        out.push(' ' + line.slice(i, i + 74));
+        i += 74;
+    }
+    return out.join('\r\n');
 }
 
 // ---------- RENDER: BALLOT ----------
