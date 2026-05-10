@@ -1399,6 +1399,115 @@ body.ssc-body {
     border-color: var(--ssc-coral);
 }
 
+/* Archive screening card */
+.admin-archive {
+    border-color: rgba(242, 180, 74, 0.35);
+    background: linear-gradient(180deg, rgba(242, 180, 74, 0.07), rgba(242, 180, 74, 0.02));
+}
+.admin-archive h2 {
+    color: var(--ssc-amber);
+}
+.admin-archive .admin-hint strong {
+    color: var(--ssc-cream);
+}
+.archive-photo {
+    margin: 14px 0 6px;
+}
+.archive-drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    padding: 18px;
+    border: 2px dashed rgba(247, 234, 208, 0.25);
+    border-radius: 14px;
+    background: rgba(20, 12, 34, 0.4);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+}
+.archive-drop:hover,
+.archive-drop:focus-visible {
+    border-color: rgba(242, 180, 74, 0.6);
+    outline: none;
+}
+.archive-drop.is-dragging {
+    border-color: var(--ssc-amber);
+    background: rgba(242, 180, 74, 0.1);
+}
+.archive-drop.has-photo {
+    border-style: solid;
+    border-color: rgba(242, 180, 74, 0.4);
+    cursor: default;
+    padding: 0;
+}
+.archive-drop-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+    color: rgba(247, 234, 208, 0.65);
+    pointer-events: none;
+}
+.archive-drop-empty strong {
+    color: var(--ssc-cream);
+    font-size: 1rem;
+}
+.archive-drop-empty span {
+    font-size: 0.82rem;
+}
+.archive-drop.has-photo .archive-drop-empty {
+    display: none;
+}
+.archive-drop-preview {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+.archive-drop-clear {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    background: rgba(20, 12, 34, 0.85);
+    color: var(--ssc-cream);
+    border: 1px solid rgba(247, 234, 208, 0.3);
+    border-radius: 999px;
+    cursor: pointer;
+}
+.archive-drop-clear:hover {
+    border-color: var(--ssc-coral);
+    color: var(--ssc-coral);
+}
+.admin-archive-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.admin-archive-actions button {
+    background: var(--ssc-amber);
+    color: var(--ssc-plum-deep);
+    border: 1px solid var(--ssc-amber);
+    font-weight: 500;
+}
+.admin-archive-actions button:hover:not(:disabled) {
+    background: #ffc864;
+}
+.admin-archive-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.archive-status {
+    font-size: 0.85rem;
+    color: rgba(247, 234, 208, 0.7);
+}
+
 @media (max-width: 600px) {
     .ballot-card {
         grid-template-columns: 1fr;

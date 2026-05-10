@@ -5,3 +5,10 @@ compatibility_date = "2025-04-01"
 [[kv_namespaces]]
 binding = "CINEMA_KV"
 id = "fc646ff6f3c54efb96aff83e47d52c75"
+
+[[r2_buckets]]
+binding = "CINEMA_PHOTOS"
+bucket_name = "ssc-photos"
+
+[vars]
+PHOTOS_PUBLIC_BASE = "https://second-saturday-cinema.hazletok.workers.dev/photo"

@@ -2,6 +2,7 @@ import { verifyToken, handleAuth, clearCookieHeader } from './auth.js';
 import { listMovies, nominateMovie, toggleVote, removeMovie } from './movies.js';
 import { handleAdmin } from './admin.js';
 import { listScreenings } from './screenings.js';
+import { servePhoto } from './photos.js';
 import { corsHeaders, json, unauthorized } from './utils.js';
 
 export default {
@@ -15,6 +16,11 @@ export default {
         }
 
         try {
+            const photoMatch = url.pathname.match(/^\/photo\/(.+)$/);
+            if (photoMatch && request.method === 'GET') {
+                return servePhoto(photoMatch[1], env);
+            }
+
             if (url.pathname === '/auth' && request.method === 'POST') {
                 return handleAuth(request, env, 'guest', cors);
             }

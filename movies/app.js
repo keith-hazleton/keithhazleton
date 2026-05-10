@@ -285,12 +285,42 @@ function renderAdminPanel() {
     const votingClosesLocal = ev.votingClosesAt
         ? new Date(ev.votingClosesAt).toISOString().slice(0, 16)
         : '';
+    const selected = ev.selectedMovie || null;
 
     panel.innerHTML = `
         <div class="admin-header">
             <h1>Admin</h1>
             <a href="#/" class="admin-back">← Back to site</a>
         </div>
+
+        ${selected ? `
+        <section class="admin-block admin-archive">
+            <h2>Archive last screening</h2>
+            <p class="admin-hint">Saves <strong>${escapeHtml(selected.title)}</strong> to past screenings, clears the marquee, and wipes the ballot for next month.</p>
+            <form id="admin-archive-form" class="admin-form">
+                <label>Title <input type="text" name="title" value="${escapeAttr(selected.title)}" required></label>
+                <label>Date <input type="date" name="date" value="${escapeAttr(ev.date || '')}" required></label>
+                <label>One-liner review (optional) <input type="text" name="review" placeholder="What did everyone think?"></label>
+
+                <div class="archive-photo">
+                    <div class="archive-drop" id="archive-drop" tabindex="0">
+                        <div class="archive-drop-empty">
+                            <strong>Drop a photo here</strong>
+                            <span>or click to choose · drag straight from Photos.app</span>
+                        </div>
+                        <img class="archive-drop-preview" id="archive-drop-preview" alt="" hidden>
+                        <button type="button" class="archive-drop-clear" id="archive-drop-clear" hidden>Remove photo</button>
+                    </div>
+                    <input type="file" id="archive-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden>
+                </div>
+
+                <div class="admin-archive-actions">
+                    <button type="submit" id="archive-submit">Archive + reset</button>
+                    <span class="archive-status" id="archive-status" aria-live="polite"></span>
+                </div>
+            </form>
+        </section>
+        ` : ''}
 
         <section class="admin-block">
             <h2>Event</h2>
@@ -361,6 +391,159 @@ function renderAdminPanel() {
     panel.querySelectorAll('.admin-screening-edit').forEach(form => {
         form.addEventListener('submit', onScreeningEdit);
     });
+    if (document.getElementById('admin-archive-form')) {
+        initArchiveForm();
+    }
+}
+
+// ---------- ARCHIVE ----------
+let pendingArchivePhoto = null;
+
+function initArchiveForm() {
+    pendingArchivePhoto = null;
+    const drop = document.getElementById('archive-drop');
+    const fileInput = document.getElementById('archive-file-input');
+    const preview = document.getElementById('archive-drop-preview');
+    const clearBtn = document.getElementById('archive-drop-clear');
+    const form = document.getElementById('admin-archive-form');
+
+    drop.addEventListener('click', (e) => {
+        if (e.target === clearBtn) return;
+        fileInput.click();
+    });
+    drop.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+    fileInput.addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (f) handleArchivePhoto(f);
+    });
+    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add('is-dragging');
+    }));
+    ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        if (ev === 'dragleave' && drop.contains(e.relatedTarget)) return;
+        drop.classList.remove('is-dragging');
+    }));
+    drop.addEventListener('drop', (e) => {
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) handleArchivePhoto(f);
+    });
+    clearBtn.addEventListener('click', () => {
+        pendingArchivePhoto = null;
+        preview.hidden = true;
+        preview.removeAttribute('src');
+        clearBtn.hidden = true;
+        drop.classList.remove('has-photo');
+        fileInput.value = '';
+    });
+
+    form.addEventListener('submit', onArchiveSubmit);
+}
+
+async function handleArchivePhoto(file) {
+    const status = document.getElementById('archive-status');
+    const preview = document.getElementById('archive-drop-preview');
+    const clearBtn = document.getElementById('archive-drop-clear');
+    const drop = document.getElementById('archive-drop');
+
+    if (!file.type.startsWith('image/')) {
+        status.textContent = 'That file isn\'t an image.';
+        return;
+    }
+    status.textContent = 'Processing photo…';
+    try {
+        const resized = await resizeImage(file, 1600, 0.85);
+        pendingArchivePhoto = resized;
+        preview.src = URL.createObjectURL(resized);
+        preview.hidden = false;
+        clearBtn.hidden = false;
+        drop.classList.add('has-photo');
+        const kb = Math.round(resized.size / 1024);
+        status.textContent = `Photo ready (${kb} KB).`;
+    } catch (err) {
+        console.error(err);
+        status.textContent = 'Couldn\'t read that photo. Try a JPEG or PNG.';
+        pendingArchivePhoto = null;
+    }
+}
+
+function resizeImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const w = Math.round(img.width * ratio);
+            const h = Math.round(img.height * ratio);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('encode failed')), 'image/jpeg', quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode failed')); };
+        img.src = url;
+    });
+}
+
+async function uploadArchivePhoto(blob) {
+    const token = getToken();
+    const res = await fetch(API + '/admin/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': blob.type || 'image/jpeg', 'Authorization': `Bearer ${token}` },
+        body: blob,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status !== 200) throw new Error(data.error || 'Upload failed');
+    return data.url;
+}
+
+async function onArchiveSubmit(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const submit = document.getElementById('archive-submit');
+    const status = document.getElementById('archive-status');
+    const fd = new FormData(form);
+    const ev = state.event || {};
+    const selected = ev.selectedMovie || {};
+
+    const body = {
+        title: (fd.get('title') || '').trim(),
+        date: fd.get('date'),
+        review: (fd.get('review') || '').trim() || null,
+        movieId: selected.id || null,
+    };
+    if (!body.title || !body.date) {
+        status.textContent = 'Title and date are required.';
+        return;
+    }
+    if (!confirm('Archive this screening, clear the marquee, and wipe the ballot?')) return;
+
+    submit.disabled = true;
+    try {
+        if (pendingArchivePhoto) {
+            status.textContent = 'Uploading photo…';
+            body.photoUrl = await uploadArchivePhoto(pendingArchivePhoto);
+        }
+        status.textContent = 'Archiving…';
+        const { status: code, data } = await api('/admin/archive', {
+            method: 'POST', body: JSON.stringify(body),
+        });
+        if (code !== 200) throw new Error(data.error || 'Archive failed');
+        pendingArchivePhoto = null;
+        status.textContent = 'Done.';
+        await refreshAll();
+        renderAdminPanel();
+    } catch (err) {
+        console.error(err);
+        status.textContent = err.message || 'Something went wrong.';
+        submit.disabled = false;
+    }
 }
 
 function renderScreeningRow(s) {

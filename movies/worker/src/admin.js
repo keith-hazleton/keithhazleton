@@ -1,9 +1,14 @@
 import { json } from './utils.js';
+import { uploadPhoto } from './photos.js';
 
 export async function handleAdmin(request, env, cors) {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+
+    if (path === '/admin/upload' && method === 'POST') {
+        return uploadPhoto(request, env, cors);
+    }
 
     if (path === '/admin/event' && method === 'POST') {
         const body = await request.json().catch(() => ({}));
@@ -44,6 +49,46 @@ export async function handleAdmin(request, env, cors) {
         event.selectedMovie = { id, title: movie.title };
         await env.CINEMA_KV.put('config:event', JSON.stringify(event));
         return json({ event }, 200, cors);
+    }
+
+    if (path === '/admin/archive' && method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        if (!body.title || !body.date) {
+            return json({ error: 'title and date required' }, 400, cors);
+        }
+
+        const counterRaw = await env.CINEMA_KV.get('meta:screeningCounter');
+        const id = (parseInt(counterRaw) || 0) + 1;
+        const screening = {
+            id,
+            movieId: body.movieId || null,
+            title: body.title,
+            date: body.date,
+            photoUrl: body.photoUrl || null,
+            review: body.review || null,
+            createdAt: new Date().toISOString(),
+        };
+        await env.CINEMA_KV.put(`screening:${id}`, JSON.stringify(screening));
+        await env.CINEMA_KV.put('meta:screeningCounter', String(id));
+
+        const event = (await env.CINEMA_KV.get('config:event', 'json')) || {};
+        delete event.selectedMovie;
+        await env.CINEMA_KV.put('config:event', JSON.stringify(event));
+
+        const movieList = await env.CINEMA_KV.list({ prefix: 'movie:' });
+        for (const k of movieList.keys) {
+            const m = await env.CINEMA_KV.get(k.name, 'json');
+            if (m && (m.status === 'active' || m.status === 'selected')) {
+                m.status = 'removed';
+                await env.CINEMA_KV.put(k.name, JSON.stringify(m));
+            }
+        }
+        const votes = await env.CINEMA_KV.list({ prefix: 'votes:' });
+        for (const k of votes.keys) {
+            await env.CINEMA_KV.put(k.name, JSON.stringify({ count: 0, tokens: [] }));
+        }
+
+        return json({ screening, event }, 200, cors);
     }
 
     if (path === '/admin/screening' && method === 'POST') {
